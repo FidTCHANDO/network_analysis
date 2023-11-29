@@ -41,7 +41,7 @@ class SlackDataLoader:
         '''
         write a function to get all the users from the json file
         '''
-        with open(os.path.join(self.path, '2022-08-12.json'), 'r') as f:
+        with open(os.path.join(self.path, 'users.json'), 'r') as f:
             users = json.load(f)
 
         return users
@@ -50,7 +50,7 @@ class SlackDataLoader:
         '''
         write a function to get all the channels from the json file
         '''
-        with open(os.path.join(self.path, '2022-08-12.json'), 'r') as f:
+        with open(os.path.join(self.path, 'channels.json'), 'r') as f:
             channels = json.load(f)
 
         return channels
