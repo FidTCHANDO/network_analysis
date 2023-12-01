@@ -10,6 +10,15 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 from nltk.corpus import stopwords
 
+# Json data files importing
+def get_json(path_channel):
+    combined = []
+    for json_file in glob.glob(f"{path_channel}*.json"):
+        with open(json_file, 'r', encoding="utf8") as slack_data:
+            data = json.load(slack_data)
+            combined.append(data)
+
+    return combined
 
 def break_combined_weeks(combined_weeks):
     """
@@ -52,6 +61,7 @@ def get_messages_dict(msgs):
             "mentions":[],
             "emojis":[],
             "reactions":[],
+            "thread_ts":[],
             "replies":[],
             "replies_to":[],
             "ts":[],
@@ -83,10 +93,23 @@ def get_messages_dict(msgs):
 
             if "thread_ts" in msg and "reply_users" in msg:
                 msg_list["replies"].append(msg["replies"])
+                msg_list["thread_ts"].append(msg["thread_ts"])
             else:
                 msg_list["replies"].append(None)
+                msg_list["thread_ts"].append(None)
             
-            if "blocks" in msg:
+            # if "attachments" in msg :
+            #     if msg["attachments"] != None:
+            #         msg_list["attachments"].append(msg["attachments"])
+            #     else : msg_list["attachments"].append(None)
+
+            # else : msg_list["attachments"].append(None)
+
+            if "attachments" in msg :
+                msg_list["attachments"].append(msg["attachments"])
+            else : msg_list["attachments"].append(None)
+            
+            if "blocks" in msg and msg["blocks"] != None:
                 emoji_list = []
                 mention_list = []
                 link_count = 0
@@ -128,7 +151,7 @@ def from_msg_get_replies(msg):
         try:
             for reply in msg["replies"]:
                 reply["thread_ts"] = msg["thread_ts"]
-                reply["message_id"] = msg["client_msg_id"]
+                reply["message_id"] = msg["msg_id"]
                 replies.append(reply)
         except:
             pass
@@ -162,7 +185,6 @@ def get_messages_from_channel(channel_path):
     print(f"Number of messages in channel: {len(df)}")
     
     return df
-
 
 def convert_2_timestamp(column, data):
     """convert from unix time to readable timestamp
