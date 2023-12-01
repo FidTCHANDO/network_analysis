@@ -45,12 +45,10 @@ def break_combined_weeks(combined_weeks):
 
 def get_msgs_df_info(df):
     msgs_count_dict = df.user.value_counts().to_dict()
-    replies_count_dict = dict(Counter([u for r in df.replies if r != None for u in r]))
+    replies_count_dict = dict(Counter([u["user"] for r in df.replies if r != None for u in r]))
     mentions_count_dict = dict(Counter([u for m in df.mentions if m != None for u in m]))
     links_count_dict = df.groupby("user").link_count.sum().to_dict()
     return msgs_count_dict, replies_count_dict, mentions_count_dict, links_count_dict
-
-
 
 def get_messages_dict(msgs):
     msg_list = {
@@ -148,13 +146,19 @@ def get_messages_dict(msgs):
 def from_msg_get_replies(msg):
     replies = []
     if "thread_ts" in msg and "replies" in msg:
-        try:
-            for reply in msg["replies"]:
-                reply["thread_ts"] = msg["thread_ts"]
-                reply["message_id"] = msg["msg_id"]
-                replies.append(reply)
-        except:
-            pass
+        replies = [u for r in msg["replies"] if r != None for u in r]
+        # try:
+            
+        #     for ind in range(len(msg["replies"])):
+        #         reply = msg["replies"][ind]
+        #         if reply != None:
+        #             for i in range(len(reply)):
+        #                 reply[i]["thread_ts"] = msg["thread_ts"][ind]
+        #                 reply[i]["message_id"] = msg["msg_id"][ind]
+        #                 replies.append(reply[i])
+        #         else: continue
+        # except:
+        #     pass
     return replies
 
 def msgs_to_df(msgs):
@@ -179,7 +183,7 @@ def get_messages_from_channel(channel_path):
     get all the messages from a channel        
     '''
     channel_json_files = os.listdir(channel_path)
-    channel_msgs = [json.load(open(channel_path + "/" + f)) for f in channel_json_files]
+    channel_msgs = [json.load(open(channel_path + f)) for f in channel_json_files]
 
     df = pd.concat([pd.DataFrame(get_messages_dict(msgs)) for msgs in channel_msgs])
     print(f"Number of messages in channel: {len(df)}")
